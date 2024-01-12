@@ -313,7 +313,6 @@ def load_crop_images(PATH_IMAGENS_,
         # print(PATH_MASK + id_[0:-4])
         # mask_geral = cv2.imread('/home/lucas/Documentos/mestrado/visao/atividades/05 agrupamento/dataset/labelMe/collection/masks-geral/cm200819-104308007-mask.png', 0)  # ler em escala de cinza
         mask_geral = cv2.imread(PATH_MASK + id_[0:-4] + "-mask.png", 0)  # ler em escala de cinza
-        print("shape", mask_geral.shape)
         mask_geral = mask_geral > 0  # binário
 
         # Armazena a área das regiões dos labels para pegar a área mínima de cada imagem
@@ -345,4 +344,45 @@ def load_crop_images(PATH_IMAGENS_,
     dataset.img_id = dataset.img_id.astype('category')
     dataset.label = dataset.label.astype('category')
 
+    return dataset
+
+def load_crop_images_positiva(PATH_IMAGENS_, IMG_ALTURA_=128, IMG_LARGURA_=128, IMG_CANAIS_=3):
+    IMG_PASSO_INICIAL_ = IMG_LARGURA_ // 4
+
+    global PATH_IMAGENS, IMG_ALTURA, IMG_LARGURA, IMG_CANAIS, IMG_PASSO_INICIAL
+    PATH_IMAGENS = PATH_IMAGENS_
+    IMG_ALTURA = IMG_ALTURA_
+    IMG_LARGURA = IMG_LARGURA_
+    IMG_CANAIS = IMG_CANAIS_
+    IMG_PASSO_INICIAL = IMG_PASSO_INICIAL_
+
+    imagens_ids = sorted(next(os.walk(PATH_IMAGENS))[2])
+    print("Total de Imagens: ", len(imagens_ids))
+
+    dataset = pd.DataFrame(columns=['img', 'img_id'])
+
+    for img_cont, id_ in tqdm(enumerate(imagens_ids), total=len(imagens_ids)):
+        # Carrega as imagens
+        img = cv2.imread(PATH_IMAGENS + id_)[:, :, :IMG_CANAIS]
+        img = img / 255.0  # Normalização
+
+        # Variáveis de recorte
+        start_h, start_w = 0, 0
+        end_h, end_w = IMG_ALTURA, IMG_LARGURA
+        IMG_PASSO = IMG_PASSO_INICIAL
+
+        while (start_h + IMG_ALTURA) <= img.shape[0]:
+            while (start_w + IMG_LARGURA) <= img.shape[1]:
+                # Recorte da imagem
+                img_recorte = img[start_h:end_h, start_w:end_w, :]
+                dataset = pd.concat([dataset, pd.DataFrame({'img': [img_recorte], 'img_id': [img_cont]})], ignore_index=True)
+
+                start_w += IMG_PASSO
+                end_w += IMG_PASSO
+
+            start_w, end_w = 0, IMG_LARGURA
+            start_h += IMG_PASSO
+            end_h += IMG_PASSO
+
+    dataset.img_id = dataset.img_id.astype('category')
     return dataset
