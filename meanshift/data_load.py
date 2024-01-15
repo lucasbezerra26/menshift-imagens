@@ -346,7 +346,7 @@ def load_crop_images(PATH_IMAGENS_,
 
     return dataset
 
-def load_crop_images_positiva(PATH_IMAGENS_, IMG_ALTURA_=128, IMG_LARGURA_=128, IMG_CANAIS_=3):
+def load_crop_images_negativa(PATH_IMAGENS_, IMG_ALTURA_=128, IMG_LARGURA_=128, IMG_CANAIS_=3):
     IMG_PASSO_INICIAL_ = IMG_LARGURA_ // 4
 
     global PATH_IMAGENS, IMG_ALTURA, IMG_LARGURA, IMG_CANAIS, IMG_PASSO_INICIAL
